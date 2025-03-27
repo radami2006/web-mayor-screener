@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI CV Screener</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body class="dark-mode">
+    <div class="app-container">
+        <header class="app-header">
+            <h1>AI CV Screener</h1>
+            <button id="darkModeToggle" class="dark-mode-btn" aria-label="Toggle Dark Mode">
+                <i class="fas fa-sun"></i>
+            </button>
+        </header>
+
+        <div class="chat-container">
+            <div class="chat-messages" id="chatBox">
+                <!-- Chat messages go here -->
+            </div>
+
+            <div class="input-area">
+                <div class="message-input-group">
+                    <button class="add-button">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <input type="text" id="messageInput" placeholder="Message AI CV Screener..." autocomplete="off">
+                    <button id="sendButton" aria-label="Send"><i class="fas fa-paper-plane"></i></button>
+                    <label for="cvInput" class="upload-button">
+                        <i class="fas fa-upload"></i>
+                    </label>
+                    <input type="file" id="cvInput" accept=".pdf,.doc,.docx" multiple style="display: none;">
+                </div>
+            </div>
+        </div>
+
+        <footer class="app-footer">
+            <p>AI CV Screener may produce errors. Double-check important information.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

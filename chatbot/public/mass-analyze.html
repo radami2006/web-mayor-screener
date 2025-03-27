@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mass CV Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root[data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --accent-primary: #10b981;
+            --accent-secondary: #2563eb;
+            --border-color: #e2e8f0;
+            --hover-bg: #f1f5f9;
+            --input-bg: #ffffff;
+            --message-user: #ecfdf5;
+            --message-assistant: #f1f5f9;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        :root[data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent-primary: #34d399;
+            --accent-secondary: #60a5fa;
+            --border-color: #334155;
+            --hover-bg: #293548;
+            --input-bg: #1e293b;
+            --message-user: #064e3b;
+            --message-assistant: #334155;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-secondary);
+            text-decoration: none;
+            transition: transform 0.2s ease;
+        }
+
+        .logo-text:hover {
+            transform: scale(1.02);
+        }
+
+        .theme-toggle {
+            margin-left: auto;
+            padding: 0.5rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--hover-bg);
+            transform: translateY(-2px);
+        }
+
+        .theme-toggle svg {
+            stroke: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-4px);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            padding: 2rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--input-bg);
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-area:hover, .upload-area.drag-over {
+            border-color: var(--accent-primary);
+            background: var(--hover-bg);
+            transform: scale(1.01);
+        }
+
+        .upload-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            margin-bottom: 1rem;
+            fill: var(--accent-primary);
+        }
+
+        .requisites-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .requisite-field {
+            margin-bottom: 1rem;
+        }
+
+        .requisite-field label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .requisite-field input,
+        .requisite-field textarea,
+        .requisite-field select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .requisite-field textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .requisite-field input:focus,
+        .requisite-field textarea:focus,
+        .requisite-field select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+        }
+
+        button {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #results {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            background: var(--input-bg);
+            height: 800px; /* Increased height for larger output */
+            overflow-y: auto;
+            width: 100%; /* Full width for better visibility */
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-primary);
+            border-radius: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                max-width: 100%;
+                padding: 1rem;
+            }
+            .section {
+                padding: 1.5rem;
+            }
+            #results {
+                height: 500px; /* Reduced height on mobile for usability */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a class="logo-text" href="/">Mass CV Analysis</a>
+        <a href="/" style="margin-left: 1rem; color: var(--text-primary); text-decoration: none;">Single CV Analysis</a>
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="theme-icon">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+        </button>
+    </div>
+
+    <div class="container">
+        <div class="section">
+            <h2>Mass CV Analysis</h2>
+            <div class="upload-area" id="dropArea">
+                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <p>Drag & drop multiple CV files or click to select (PDF only)</p>
+                <input type="file" id="fileInput" multiple accept=".pdf" style="display: none;">
+            </div>
+            <div id="fileList"></div>
+            <div class="requisites-container">
+                <div class="requisite-field">
+                    <label for="jobTitle">Job Title</label>
+                    <input type="text" id="jobTitle" placeholder="e.g., Software Engineer">
+                </div>
+                <div class="requisite-field">
+                    <label for="experience">Minimum Experience</label>
+                    <select id="experience">
+                        <option value="">Select years</option>
+                        <option value="0-2">0-2 years</option>
+                        <option value="2-5">2-5 years</option>
+                        <option value="5-10">5-10 years</option>
+                        <option value="10+">10+ years</option>
+                    </select>
+                </div>
+                <div class="requisite-field">
+                    <label for="skills">Required Skills (comma-separated)</label>
+                    <input type="text" id="skills" placeholder="e.g., JavaScript, Python, React">
+                </div>
+                <div class="requisite-field">
+                    <label for="description">Job Description</label>
+                    <textarea id="description" placeholder="Enter job requirements and responsibilities"></textarea>
+                </div>
+            </div>
+            <button id="analyzeButton" disabled>Analyze CVs</button>
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            html.setAttribute('data-theme', currentTheme === 'light' ? 'dark' : 'light');
+            localStorage.setItem('theme', html.getAttribute('data-theme'));
+        }
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
+        let selectedFiles = new Set();
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('fileInput');
+        const analyzeButton = document.getElementById('analyzeButton');
+        const fileList = document.getElementById('fileList');
+        const results = document.getElementById('results');
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.add('drag-over'));
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.remove('drag-over'));
+        });
+
+        dropArea.addEventListener('drop', handleDrop);
+        dropArea.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFiles);
+
+        function handleDrop(e) {
+            e.preventDefault();
+            handleFiles({ target: { files: e.dataTransfer.files } });
+        }
+
+        function handleFiles(e) {
+            [...e.target.files].forEach(file => {
+                if (file.type === 'application/pdf') {
+                    selectedFiles.add(file);
+                    updateFileList();
+                }
+            });
+            analyzeButton.disabled = selectedFiles.size === 0;
+        }
+
+        function updateFileList() {
+            fileList.innerHTML = '';
+            selectedFiles.forEach(file => {
+                const div = document.createElement('div');
+                div.className = 'file-item';
+                div.innerHTML = `
+                    <span>${file.name}</span>
+                    <span class="remove-file" data-name="${file.name}">✕</span>
+                `;
+                fileList.appendChild(div);
+            });
+
+            document.querySelectorAll('.remove-file').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    selectedFiles.forEach(file => {
+                        if (file.name === e.target.dataset.name) selectedFiles.delete(file);
+                    });
+                    updateFileList();
+                    analyzeButton.disabled = selectedFiles.size === 0;
+                });
+            });
+        }
+
+        function getJobRequisites() {
+            return {
+                jobTitle: document.getElementById('jobTitle').value.trim(),
+                experience: document.getElementById('experience').value,
+                skills: document.getElementById('skills').value.trim().split(',').map(s => s.trim()).filter(s => s),
+                description: document.getElementById('description').value.trim()
+            };
+        }
+
+        analyzeButton.addEventListener('click', async () => {
+            const formData = new FormData();
+            selectedFiles.forEach(file => formData.append('cvFiles', file));
+            const jobRequisites = getJobRequisites();
+            formData.append('jobRequisites', JSON.stringify(jobRequisites));
+
+            analyzeButton.disabled = true;
+            appendResult('Analyzing CVs...', 'assistant');
+
+            try {
+                const response = await fetch('/api/mass-analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    results.innerHTML = data.summary; // Display the summary directly
+                    selectedFiles.clear();
+                    updateFileList();
+                } else {
+                    appendResult(`Error: ${data.error}`, 'assistant');
+                }
+            } catch (error) {
+                appendResult(`Error: ${error.message}`, 'assistant');
+            } finally {
+                analyzeButton.disabled = false;
+            }
+        });
+
+        function appendResult(message, sender) {
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `message ${sender}-message`;
+            resultDiv.innerHTML = message;
+            results.appendChild(resultDiv);
+            results.scrollTo({ top: results.scrollHeight, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

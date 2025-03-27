@@ -1,0 +1,129 @@
+// **********************************************************************
+// Client-Side JavaScript
+// **********************************************************************
+
+document.addEventListener('DOMContentLoaded', () => {
+    const chatBox = document.getElementById('chatBox');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const cvInput = document.getElementById('cvInput');
+    const darkModeToggle = document.getElementById('darkModeToggle');
+
+    function addMessage(message, isUser = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message');
+        messageDiv.classList.add(isUser ? 'user-message' : 'bot-message');
+        messageDiv.innerHTML = message; // Use innerHTML to render HTML
+        chatBox.appendChild(messageDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function handleSendMessage() {
+        const message = messageInput.value.trim();
+        if (message) {
+            addMessage(message, true);
+            messageInput.value = '';
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                if (!response.ok) {
+                  const errorData = await response.json(); // Try to parse the JSON error response
+
+                  let errorMessage = `HTTP error! status: ${response.status}`;
+
+                  if (errorData && errorData.response && errorData.response.text && errorData.response.text.includes("Gemini API overloaded")) {
+                    errorMessage = "The AI service is currently experiencing high traffic. Please try again in a few minutes.";
+                  }
+                    throw new Error(errorMessage);
+                }
+
+                const data = await response.json();
+                addMessage(data.response.text, false);
+            } catch (error) {
+                console.error('Error sending message:', error);
+                addMessage(error.message, false);
+            }
+        }
+    }
+
+    async function handleFileUpload() {
+        const files = cvInput.files;
+        if (files.length > 0) {
+            const formData = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                formData.append('cvFiles', files[i]);
+            }
+
+            addMessage('Uploading CVs, please wait...', false);
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    addMessage('CVs uploaded and analysis started.', false);
+                    data.analysisResults.forEach(result => {
+                        addMessage(result, false);
+                    });
+
+                } else {
+                    addMessage(`Error: ${data.error || 'Upload failed. See console for details.'}`, false);
+                    console.error('Upload error:', data.error);
+                }
+
+            } catch (error) {
+                console.error('Error uploading files:', error);
+                addMessage('Error: Could not upload files. Please try again.', false);
+            }
+        }
+    }
+
+    let isDarkMode = localStorage.getItem('darkMode') === 'true';
+
+    function updateMode() {
+        if (isDarkMode) {
+            document.body.classList.remove('light-mode');
+            document.body.classList.add('dark-mode');
+            darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        } else {
+            document.body.classList.remove('dark-mode');
+            document.body.classList.add('light-mode');
+            darkModeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+        }
+    }
+
+    updateMode(); // Initial setup
+
+    darkModeToggle.addEventListener('click', () => {
+        isDarkMode = !isDarkMode; // Toggle the variable
+        localStorage.setItem('darkMode', isDarkMode);
+        updateMode(); // Update the UI
+    });
+
+    setTimeout(() => {
+        addMessage('Hello! Please write your message or upload the resumes you want me to analyze.', false);
+    }, 500);
+
+    sendButton.addEventListener('click', handleSendMessage);
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            handleSendMessage();
+        }
+    });
+    cvInput.addEventListener('change', handleFileUpload);
+});
